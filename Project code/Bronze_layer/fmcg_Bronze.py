@@ -17,7 +17,7 @@ class LoadingBronzeData:
         datetime_orders = (datetime.now()-timedelta(days=128)).strftime('%Y-%m-%d')
         if self.mode == 'append' and self.file_path_type == 'child':
             date = datetime_orders.replace('-','_')
-            df = spark.read.format('csv').option('header', True).load(f"{file_path}/orders_{date}.csv")
+            df = self.spark.read.format('csv').option('header', True).load(f"{file_path}/orders_{date}.csv")
         else:
             df = self.spark.read.format('csv').option('header',True).load(file_path.replace("table_name",file_name))
             if self.mode == 'append':
@@ -29,16 +29,16 @@ class LoadingBronzeData:
         return df
     def load_data_into_table(self,df,file_name):
         print(file_name,"writing into fmcg bronze")
-        if not spark.catalog.tableExists(f"fmcg.fmcg_bronze.{self.file_path_type+'_'+file_name}"):
-            df.write.format("delta").mode("overwrite").saveAsTable(f"fmcg.fmcg_bronze.{self.file_path_type+'_'+file_name}")
+        if not self.spark.catalog.tableExists(f"fmcg.fmcg_bronze.{self.file_path_type}_{file_name}"):
+            df.write.format("delta").mode("overwrite").saveAsTable(f"fmcg.fmcg_bronze.{self.file_path_type}_{file_name}")
         else:
-            df.write.format("delta").mode(self.mode).saveAsTable(f"fmcg.fmcg_bronze.{self.file_path_type+'_'+file_name}")
+            df.write.format("delta").mode(self.mode).saveAsTable(f"fmcg.fmcg_bronze.{self.file_path_type}_{file_name}")
     def load_orders_data(self,file_path):
         list_file_path = dbutils.fs.ls(f"{file_path}")
         df = None 
         for file_info in list_file_path:
             print(file_info.path)
-            df_o = spark.read.format('csv').option('header', True).load(file_info.path)
+            df_o = self.spark.read.format('csv').option('header', True).load(file_info.path)
             if df is None:
                 df = df_o
             else:
