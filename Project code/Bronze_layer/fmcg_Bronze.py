@@ -31,7 +31,8 @@ class LoadingBronzeData:
         print(file_name,"writing into fmcg bronze")
         if not spark.catalog.tableExists(f"fmcg.fmcg_bronze.{self.file_path_type+'_'+file_name}"):
             df.write.format("delta").mode("overwrite").saveAsTable(f"fmcg.fmcg_bronze.{self.file_path_type+'_'+file_name}")
-        df.write.format("delta").mode(self.mode).saveAsTable(f"fmcg.fmcg_bronze.{self.file_path_type+'_'+file_name}")
+        else:
+            df.write.format("delta").mode(self.mode).saveAsTable(f"fmcg.fmcg_bronze.{self.file_path_type+'_'+file_name}")
     def load_orders_data(self,file_path):
         list_file_path = dbutils.fs.ls(f"{file_path}")
         df = None 
